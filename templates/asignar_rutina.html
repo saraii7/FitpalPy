@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignar Rutina</title>
+</head>
+<body>
+    <h1>Asignar Rutina</h1>
+    <form method="post" action="{{ url_for('asignar_rutina') }}">
+        <label for="alumno_id">Alumno:</label>
+        <select id="alumno_id" name="alumno_id" required>
+            {% for alumno in alumnos %}
+            <option value="{{ alumno.id }}">{{ alumno.nombre }}</option>
+            {% endfor %}
+        </select><br>
+        <label for="nombre_ejercicio">Nombre Ejercicio:</label>
+        <input type="text" id="nombre_ejercicio" name="nombre_ejercicio" required><br>
+        <label for="descripcion">Descripción:</label>
+        <textarea id="descripcion" name="descripcion" required></textarea><br>
+        <button type="submit">Asignar</button>
+    </form>
+    <a href="{{ url_for('entrenador_dashboard') }}">Volver al Dashboard</a>
+</body>
+</html>

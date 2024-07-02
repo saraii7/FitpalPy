@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Administrador</title>
+</head>
+<body>
+    <h1>Dashboard de Administrador</h1>
+
+    <!-- Tabla de rutinas -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre del Ejercicio</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rutina in rutinas %}
+            <tr>
+                <td>{{ rutina['id'] }}</td>
+                <td>{{ rutina['nombre_ejercicio'] }}</td>
+                <td>{{ rutina['descripcion'] }}</td>
+                <td>
+                    <a href="{{ url_for('edit_rutina', rutina_id=rutina['id']) }}">Editar</a>
+                    <a href="{{ url_for('delete_rutina', rutina_id=rutina['id']) }}">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Enlace para agregar nueva rutina -->
+    <a href="{{ url_for('agregar_rutina') }}">Agregar Nueva Rutina</a>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Rutina</title>
+</head>
+<body>
+    <h1>Agregar Rutina</h1>
+    <form action="{{ url_for('agregar_rutina') }}" method="post">
+        <label for="nombre_ejercicio">Nombre Ejercicio:</label><br>
+        <input type="text" id="nombre_ejercicio" name="nombre_ejercicio"><br><br>
+        <label for="descripcion">Descripción:</label><br>
+        <textarea id="descripcion" name="descripcion"></textarea><br><br>
+        <input type="submit" value="Agregar Rutina">
+    </form>
+    <a href="{{ url_for('entrenador_dashboard') }}">Volver al Dashboard</a>
+    <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Rutina</title>
+</head>
+<body>
+    <h1>Editar Rutina</h1>
+    <form method="post" action="{{ url_for('edit_rutina', rutina_id=rutina['id']) }}">
+        <!-- Campos de edición de la rutina -->
+        <label for="nombre_ejercicio">Nombre del Ejercicio:</label>
+        <input type="text" id="nombre_ejercicio" name="nombre_ejercicio" value="{{ rutina['nombre_ejercicio'] }}" required><br><br>
+        
+        <label for="descripcion">Descripción:</label><br>
+        <textarea id="descripcion" name="descripcion" rows="4" cols="50">{{ rutina['descripcion'] }}</textarea><br><br>
+        
+        <button type="submit">Guardar Cambios</button>
+    </form>
+</body>
+</html>
