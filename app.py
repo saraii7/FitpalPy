@@ -1,3 +1,4 @@
+import sqlite3
 from flask import Flask, flash, render_template, request, redirect, url_for, session
 from models.admin import admin
 from models.alumno import alumno
@@ -72,41 +73,62 @@ def admin_dashboard():
 # Ruta para editar rutina
 @app.route('/edit_rutina/<int:rutina_id>', methods=['GET', 'POST'])
 def edit_rutina(rutina_id):
-    if 'user_id' in session and session['user_type'] == 'admin':
+    if 'user_id' in session and session['user_type'] in ['admin', 'entrenador']:
         conn = create_connection()
         cursor = conn.cursor()
 
-        rutina = admin.get_rutina_by_id(cursor, rutina_id)
+        # Obtener la rutina por ID
+        rutina = None
+        if session['user_type'] == 'admin':
+            rutina = admin.get_rutina_by_id(cursor, rutina_id)
+        elif session['user_type'] == 'entrenador':
+            rutina = entrenador.get_rutina_by_id(cursor, rutina_id)
 
         cursor.close()
         conn.close()
 
         if rutina:
             if request.method == 'POST':
-                # Procesar la actualización de la rutina aquí si es necesario
+                nombre_ejercicio = request.form['nombre_ejercicio']
+                descripcion = request.form['descripcion']
+
+                conn = create_connection()
+                cursor = conn.cursor()
+
+                if session['user_type'] == 'admin':
+                    admin.update_rutina(cursor, rutina_id, nombre_ejercicio, descripcion)
+                elif session['user_type'] == 'entrenador':
+                    entrenador.update_rutina(cursor, rutina_id, nombre_ejercicio, descripcion)
+
+                conn.commit()
+                conn.close()
+
                 flash('Rutina actualizada correctamente', 'success')
-                return redirect(url_for('admin_dashboard'))
+                return redirect(url_for('entrenador_dashboard' if session['user_type'] == 'entrenador' else 'admin_dashboard'))
             else:
                 return render_template('edit_rutina.html', rutina=rutina)
         else:
             flash('Rutina no encontrada', 'error')
-            return redirect(url_for('admin_dashboard'))
+            return redirect(url_for('entrenador_dashboard' if session['user_type'] == 'entrenador' else 'admin_dashboard'))
     else:
         return redirect(url_for('login'))
-
 # Ruta para eliminar rutina
 @app.route('/delete_rutina/<int:rutina_id>')
 def delete_rutina(rutina_id):
-    if 'user_id' in session and session['user_type'] == 'admin':
+    if 'user_id' in session and session['user_type'] in ['admin', 'entrenador']:
         conn = create_connection()
         cursor = conn.cursor()
 
-        admin.delete_rutina(cursor, rutina_id)
+        if session['user_type'] == 'admin':
+            admin.delete_rutina(cursor, rutina_id)
+        elif session['user_type'] == 'entrenador':
+            entrenador.delete_rutina(cursor, rutina_id)
 
-        conn.commit()  # Aplica los cambios a la base de datos
+        conn.commit()
         conn.close()
-        
-        return redirect(url_for('admin_dashboard'))
+
+        flash('Rutina eliminada correctamente', 'success')
+        return redirect(url_for('entrenador_dashboard' if session['user_type'] == 'entrenador' else 'admin_dashboard'))
     else:
         return redirect(url_for('login'))
 
@@ -114,13 +136,46 @@ def delete_rutina(rutina_id):
 @app.route('/entrenador/dashboard')
 def entrenador_dashboard():
     if 'user_id' in session and session['user_type'] == 'entrenador':
-        entrenador_actual = entrenador.get_by_id(session['user_id'])  
+        conn = create_connection()
+        cursor = conn.cursor()
+    
+        entrenador_actual = entrenador.get_by_id(cursor, session['user_id'])  # Aquí se pasa el user_id
+        
         if entrenador_actual:
             rutinas = entrenador_actual.get_rutinas()
+            cursor.close()
+            conn.close()
             return render_template('entrenador_dashboard.html', rutinas=rutinas)
         else:
+            cursor.close()
+            conn.close()
             flash('Entrenador no encontrado.', 'error')
             return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
+@app.route('/entrenador/asignar_rutina', methods=['POST'])
+def asignar_rutina():
+    if 'user_id' in session and session['user_type'] == 'entrenador':
+        if request.method == 'POST':
+            entrenador_id = session['user_id']
+            alumno_id = request.form.get('alumno_id')
+            nombre_ejercicio = request.form.get('nombre_ejercicio')
+            descripcion = request.form.get('descripcion')
+
+            entrenador.assign_rutina_to_alumno(entrenador_id, alumno_id, nombre_ejercicio, descripcion)
+
+            flash('Rutina asignada correctamente al alumno.', 'success')
+            return redirect(url_for('entrenador_dashboard'))
+        else:
+            conn = create_connection()
+            cursor = conn.cursor()
+
+            # Obtener la lista de alumnos
+            cursor.execute("SELECT id, nombre FROM usuarios WHERE tipo_usuario = 'alumno'")
+            alumnos = cursor.fetchall()
+            conn.close()
+
+            return render_template('asignar_rutina.html', alumnos=alumnos)
     else:
         return redirect(url_for('login'))
 
@@ -149,16 +204,33 @@ def alumno_dashboard():
     
 @app.route('/agregar_rutina', methods=['GET', 'POST'])
 def agregar_rutina():
-    if 'user_id' in session and session['user_type'] == 'entrenador':
-        if request.method == 'POST':
-            nombre_ejercicio = request.form['nombre_ejercicio']
-            descripcion = request.form['descripcion']
-            entrenador(session['user_id']).agregar_rutina(session['user_id'], nombre_ejercicio, descripcion)
-            return redirect(url_for('entrenador_dashboard'))
-
-        return render_template('agregar_rutina.html')
-    else:
+    if 'user_id' not in session:
         return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        nombre_ejercicio = request.form['nombre_ejercicio']
+        descripcion = request.form['descripcion']
+
+        if not nombre_ejercicio or not descripcion:
+            flash('Todos los campos son obligatorios.')
+            return redirect(url_for('agregar_rutina'))
+
+        # Obtener el entrenador actual desde la base de datos usando el user_id de la sesión
+        conn = sqlite3.connect('database/fitpal.db')
+        cursor = conn.cursor()
+        entrenador_actual = entrenador.get_by_id(cursor, session['user_id'])
+        conn.close()
+
+        if entrenador_actual:
+            # Agregar la rutina a través del método de la clase entrenador
+            entrenador_actual.add_rutina(nombre_ejercicio, descripcion)
+            flash('Rutina agregada exitosamente.')
+            return redirect(url_for('entrenador_dashboard'))
+        else:
+            flash('No se encontró al entrenador.')
+            return redirect(url_for('agregar_rutina'))
+    
+    return render_template('agregar_rutina.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

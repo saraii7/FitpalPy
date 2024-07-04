@@ -4,18 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Rutina</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-    <h1>Editar Rutina</h1>
-    <form method="post" action="{{ url_for('edit_rutina', rutina_id=rutina['id']) }}">
-        <!-- Campos de edición de la rutina -->
-        <label for="nombre_ejercicio">Nombre del Ejercicio:</label>
-        <input type="text" id="nombre_ejercicio" name="nombre_ejercicio" value="{{ rutina['nombre_ejercicio'] }}" required><br><br>
-        
-        <label for="descripcion">Descripción:</label><br>
-        <textarea id="descripcion" name="descripcion" rows="4" cols="50">{{ rutina['descripcion'] }}</textarea><br><br>
-        
-        <button type="submit">Guardar Cambios</button>
-    </form>
+<body class="container">
+    <div class="form-box">
+        <form class="form" method="post" action="{{ url_for('edit_rutina', rutina_id=rutina['id']) }}">
+            <span class="title">Editar Rutina</span>
+            <div class="form-container">
+                <label for="nombre_ejercicio">Nombre del Ejercicio:</label>
+                <input type="text" id="nombre_ejercicio" name="nombre_ejercicio" class="input" value="{{ rutina['nombre_ejercicio'] }}" required><br><br>
+                
+                <label for="descripcion">Descripción:</label><br>
+                <textarea id="descripcion" name="descripcion" class="input" rows="4" cols="50">{{ rutina['descripcion'] }}</textarea><br><br>
+            </div>
+            <button type="submit" class="btn">Guardar Cambios</button>
+        </form>
+    </div>
 </body>
 </html>

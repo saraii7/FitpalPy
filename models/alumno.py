@@ -24,12 +24,14 @@ class alumno(usuario):
 
         conn.close()
         return entrenador
-@staticmethod
-def get_by_id(cursor, id):
-        query = "SELECT * FROM alumnos WHERE id = %s"
+    
+    @staticmethod
+    def get_by_id(cursor, id):
+        query = "SELECT * FROM usuarios WHERE id = ? AND tipo_usuario = 'alumno'"
         cursor.execute(query, (id,))
         alumno_data = cursor.fetchone()
         if alumno_data:
-            return alumno(alumno_data)  # Suponiendo que tienes una clase Alumno que crea un objeto alumno
+        # Desempaqueta los datos de alumno_data y crea una instancia de alumno
+            return alumno(*alumno_data[0:4])  # Suponiendo que los primeros cuatro campos son id, email, password, nombre
         else:
             return None

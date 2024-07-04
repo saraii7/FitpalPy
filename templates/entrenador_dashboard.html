@@ -3,32 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrenador Dashboard</title>
+    <title>Dashboard de Entrenador</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-    <h1>Entrenador Dashboard</h1>
-    <h2>Mis Rutinas</h2>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre Ejercicio</th>
-                <th>Descripción</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for rutina in rutinas %}
-            <tr>
-                <td>{{ rutina.id }}</td>
-                <td>{{ rutina.nombre_ejercicio }}</td>
-                <td>{{ rutina.descripcion }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <br>
-    <a href="{{ url_for('asignar_rutina') }}">Asignar Rutina</a>
-    <a href="{{ url_for('agregar_rutina') }}">Agregar Rutina</a>
-    <a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+<body class="container">
+    <div class="form-box">
+        <form class="form">
+            <span class="title">Entrenador Dashboard</span>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre del Ejercicio</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rutina in rutinas %}
+                    <tr>
+                        <td>{{ rutina['id'] }}</td>  {# Asumiendo que el ID está en la clave 'id' del diccionario #}
+                        <td>{{ rutina['nombre_ejercicio'] }}</td>  {# Nombre del ejercicio #}
+                        <td>{{ rutina['descripcion'] }}</td>  {# Descripción #}
+                        <td>
+                            <a href="{{ url_for('edit_rutina', rutina_id=rutina['id']) }}" class="dashboard-link">Editar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="form-section">
+                <a href="{{ url_for('agregar_rutina') }}" class="button-link" class="dashboard-link">Agregar Rutina</a>
+                <a href="{{ url_for('asignar_rutina') }}" class="button-link" class="dashboard-link">Asignar Rutina a Alumno</a>
+                <a href="{{ url_for('logout') }}" class="button-link" class="dashboard-link">Cerrar Sesión</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>
