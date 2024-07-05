@@ -9,6 +9,10 @@ from database.database import create_connection
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+def get_db_connection():
+    if app.config.get('TESTING'):
+        return sqlite3.connect(':memory:')
+    return create_connection()
 
 #Ruta para la página principal
 @app.route('/')
