@@ -1,0 +1,1 @@
+FitPal es una aplicación de entrenamiento personalizado que ofrece a los usuarios planes de ejercicio adaptados a sus objetivos. Los entrenadores tienen acceso a la información de los alumnos y las rutinas, mientras que los alumnos pueden acceder a la aplicación y sus rutinas.
