@@ -41,17 +41,6 @@ class entrenador(usuario):
         conn.close()
         return [{'id': row[0], 'nombre_ejercicio': row[1], 'descripcion': row[2]} for row in rutinas]
 
-    @staticmethod
-    def assign_rutina(entrenador_id, alumno_id, nombre_ejercicio, descripcion):
-        conn = sqlite3.connect('database/fitpal.db')
-        cursor = conn.cursor()
-
-        cursor.execute('INSERT INTO rutinas (nombre_ejercicio, descripcion, usuario_id) VALUES (?, ?, ?)',
-                       (nombre_ejercicio, descripcion, alumno_id))
-        conn.commit()
-
-        conn.close()
-
     def add_rutina(self, nombre_ejercicio, descripcion):
         conn = sqlite3.connect('database/fitpal.db')
         cursor = conn.cursor()
@@ -66,7 +55,11 @@ class entrenador(usuario):
         conn = sqlite3.connect('database/fitpal.db')
         cursor = conn.cursor()
 
-        cursor.execute('SELECT id, nombre_ejercicio, descripcion FROM rutinas WHERE usuario_id = ?', (self.id,))
+        cursor.execute('''
+        SELECT id, nombre_ejercicio, descripcion
+        FROM rutinas
+        WHERE usuario_id = ?
+    ''', (self.id,))
         rutinas = cursor.fetchall()
 
         conn.close()
@@ -76,12 +69,21 @@ class entrenador(usuario):
         cursor.execute('UPDATE rutinas SET nombre_ejercicio = ?, descripcion = ? WHERE id = ?', 
                        (nombre_ejercicio, descripcion, rutina_id))
     @staticmethod
-    def assign_rutina_to_alumno(entrenador_id, alumno_id, nombre_ejercicio, descripcion):
+    def assign_rutina_to_alumno(entrenador_id, alumno_id, rutina_id):
         conn = sqlite3.connect('database/fitpal.db')
         cursor = conn.cursor()
 
-        cursor.execute('INSERT INTO rutinas (nombre_ejercicio, descripcion, usuario_id) VALUES (?, ?, ?)',
-                       (nombre_ejercicio, descripcion, alumno_id))
+        cursor.execute('SELECT * FROM asignaciones WHERE alumno_id = ? AND rutina_id = ?', (alumno_id, rutina_id))
+        existing_assignment = cursor.fetchone()
+        
+        if existing_assignment:
+            # La rutina ya está asignada a este alumno
+            conn.close()
+            return False
+        # Insertar nueva asignación
+        cursor.execute('INSERT INTO asignaciones (entrenador_id, alumno_id, rutina_id) VALUES (?, ?, ?)',
+                       (entrenador_id, alumno_id, rutina_id))
         conn.commit()
 
         conn.close()
+        return True

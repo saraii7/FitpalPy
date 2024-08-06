@@ -1,25 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asignar Rutina</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="container">
-    <h1>Asignar Rutina</h1>
-    <form method="post" action="{{ url_for('asignar_rutina') }}">
-        <label for="alumno_id">Alumno:</label>
-        <select id="alumno_id" name="alumno_id" required>
-            {% for alumno in alumnos %}
-            <option value="{{ alumno.id }}">{{ alumno.nombre }}</option>
-            {% endfor %}
-        </select><br>
-        <label for="nombre_ejercicio">Nombre Ejercicio:</label>
-        <input type="text" id="nombre_ejercicio" name="nombre_ejercicio" required><br>
-        <label for="descripcion">Descripción:</label>
-        <textarea id="descripcion" name="descripcion" required></textarea><br>
-        <button type="submit">Asignar</button>
-    </form>
-    <a href="{{ url_for('entrenador_dashboard') }}">Volver al Dashboard</a>
+    <div class="form-box">
+        <form class="form" action="{{ url_for('asignar_rutina') }}" method="post">
+            <span class="title">Asignar Rutina</span>
+            <div class="form-container">
+                <label for="alumno_id">Alumno:</label>
+                <select id="alumno_id" name="alumno_id" class="input" required>
+                    {% for alumno in alumnos %}
+                    <option value="{{ alumno[0] }}">{{ alumno[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-container">
+                <label for="rutina_id">Seleccionar Rutina:</label>
+                <select id="rutina_id" name="rutina_id" class="input" required>
+                    {% for rutina in rutinas %}
+                    <option value="{{ rutina[0] }}">{{ rutina[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Asignar Rutina</button>
+            <div class="form-section">
+                <a href="{{ url_for('entrenador_dashboard') }}" class="button-link">Volver al Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="button-link">Cerrar Sesión</a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

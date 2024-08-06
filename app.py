@@ -157,29 +157,38 @@ def entrenador_dashboard():
             return redirect(url_for('login'))
     else:
         return redirect(url_for('login'))
-@app.route('/entrenador/asignar_rutina', methods=['POST'])
+@app.route('/entrenador/asignar_rutina', methods=['GET', 'POST'])
 def asignar_rutina():
     if 'user_id' in session and session['user_type'] == 'entrenador':
+        conn = sqlite3.connect('database/fitpal.db')
+        cursor = conn.cursor()
+        entrenador_id = session['user_id']
+
         if request.method == 'POST':
-            entrenador_id = session['user_id']
-            alumno_id = request.form.get('alumno_id')
-            nombre_ejercicio = request.form.get('nombre_ejercicio')
-            descripcion = request.form.get('descripcion')
+            alumno_id = request.form['alumno_id']
+            rutina_id = request.form['rutina_id']
 
-            entrenador.assign_rutina_to_alumno(entrenador_id, alumno_id, nombre_ejercicio, descripcion)
+            # Lógica de asignación
+            success = entrenador.assign_rutina_to_alumno(entrenador_id, alumno_id, rutina_id)
 
-            flash('Rutina asignada correctamente al alumno.', 'success')
+            if success:
+                flash('Rutina asignada correctamente al alumno.', 'success')
+            else:
+                flash('Error al asignar la rutina.', 'error')
+
             return redirect(url_for('entrenador_dashboard'))
-        else:
-            conn = create_connection()
-            cursor = conn.cursor()
 
+        elif request.method == 'GET':
             # Obtener la lista de alumnos
             cursor.execute("SELECT id, nombre FROM usuarios WHERE tipo_usuario = 'alumno'")
             alumnos = cursor.fetchall()
-            conn.close()
 
-            return render_template('asignar_rutina.html', alumnos=alumnos)
+            # Obtener la lista de rutinas del entrenador
+            cursor.execute("SELECT id, nombre_ejercicio FROM rutinas WHERE usuario_id = ?", (entrenador_id,))
+            rutinas = cursor.fetchall()
+
+            conn.close()
+            return render_template('asignar_rutina.html', alumnos=alumnos, rutinas=rutinas)
     else:
         return redirect(url_for('login'))
 
